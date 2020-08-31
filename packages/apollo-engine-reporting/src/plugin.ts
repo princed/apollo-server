@@ -163,17 +163,8 @@ export const plugin = <TContext>(
         }
       }
 
-      /**
-       *  This is set to true at the beginning of the pipeline. If we resole
-       *  the operation then we have a valid graphql operation, so this boolean
-       *  can be set to true. If we end tracing before resolving the operation
-       *  The operation must have failed to validate.
-       *
-       *  If there is no operation found in `didResolveOperation` then an unknown
-       *  operation was passed.
-       */
-      let graphqlValidationFailure = true;
-      let graphqlUnknownOperationName = true;
+      let graphqlValidationFailure = false;
+      let graphqlUnknownOperationName = false;
 
       /**
        * Due to a number of exceptions in the request pipeline — which are
@@ -295,12 +286,14 @@ export const plugin = <TContext>(
             treeBuilder.trace.clientName = clientName || '';
           }
         },
+        validationDidStart() {
+          return (validationErrors?: ReadonlyArray<Error>) => {
+            graphqlValidationFailure = validationErrors
+              ? validationErrors.length !== 0
+              : false;
+          };
+        },
         async didResolveOperation(requestContext) {
-          /**
-           * We know the operation did validate here
-           */
-          graphqlValidationFailure = false;
-
           /*
            * If operation is undefined then `getOperationAST` returned null and
            * an unknown operation was specified.

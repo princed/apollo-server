@@ -172,7 +172,7 @@ export default async function pluginTestHarness<TContext>({
       return requestContext as GraphQLRequestContextWillSendResponse<TContext>;
     }
 
-    await dispatcher.invokeDidStartHook(
+    const validationDidEnd = await dispatcher.invokeDidStartHook(
       'validationDidStart',
       requestContext as GraphQLRequestContextValidationDidStart<TContext>,
     );
@@ -184,11 +184,14 @@ export default async function pluginTestHarness<TContext>({
 
     if (validationErrors.length !== 0) {
       requestContext.errors = validationErrors;
+      validationDidEnd(validationErrors);
       await dispatcher.invokeHookAsync(
         'didEncounterErrors',
         requestContext as GraphQLRequestContextDidEncounterErrors<TContext>,
       );
       return requestContext as GraphQLRequestContextWillSendResponse<TContext>;
+    } else {
+      validationDidEnd();
     }
   }
 

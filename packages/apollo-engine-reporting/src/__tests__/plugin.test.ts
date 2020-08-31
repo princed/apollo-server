@@ -96,8 +96,8 @@ describe('Operation', () => {
     expect(addTrace).toBeCalledWith(
       expect.objectContaining({
         document: undefined,
-        graphqlValidationFailure: true,
-        graphqlUnknownOperationName: true,
+        graphqlValidationFailure: false,
+        graphqlUnknownOperationName: false,
       }),
     );
   });
@@ -126,7 +126,7 @@ describe('Operation', () => {
     expect(addTrace).toBeCalledWith(
       expect.objectContaining({
         graphqlValidationFailure: true,
-        graphqlUnknownOperationName: true,
+        graphqlUnknownOperationName: false,
       }),
     );
   });
